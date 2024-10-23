@@ -1,0 +1,122 @@
+---
+title: "Lab 7 Assignment: Group 01"
+author:
+  - David Farudal (dalofa)
+  - Evgenia Samourgkanidou (s233063)
+  - Luisa Weisch (s233028)
+  - Rune Daucke (runda, s165493)
+date: 10/24-2024
+format:
+  html:
+    embed-resources: true
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+## Initialization
+
+Here, the necessary libraries and the raw data frame are loaded.
+
+```{r}
+#| label: Initialization_and_Data_loading
+#| eval: TRUE
+#| echo: TRUE
+#| results: hide
+#| message: FALSE
+#| warning: FALSE
+
+#Loading Libraries
+library(tidyverse)
+library(broom)
+library(cowplot)
+
+#Loading data
+biopsy <- read_csv("https://wilkelab.org/classes/SDS348/data_sets/biopsy.csv") %>%
+  as_tibble()
+```
+
+## PCA
+
+Here, the PCA is generated and plotted.
+
+```{r}
+#| label: PCA_Generation_and_Plotting
+#| eval: TRUE
+#| echo: TRUE
+#| message: FALSE
+#| warning: FALSE
+
+#Removes non-numeric values and creates the PCA on scaled data
+pca_fit <- biopsy %>%
+  select(where(is.numeric)) %>%
+  prcomp(scale = TRUE)
+
+#Adds the original data frame
+pca_fit_augmented <- pca_fit %>%
+  augment(biopsy)
+
+#Plots the first two PC components
+ggplot(pca_fit_augmented, aes(.fittedPC1, .fittedPC2, color = outcome)) +
+  geom_point(size = 1.5) +
+  scale_color_manual(values = c(malignant = "#D55E00", benign = "#0072B2")) +
+  theme_half_open(12) + background_grid()
+```
+
+## PCA rotation matrix
+
+Here, the PCA rotation matrix is generated and plotted.
+
+```{r}
+#| label: PCA_Rotation_Generation_and_Plotting
+#| eval: TRUE
+#| echo: TRUE
+#| message: FALSE
+#| warning: FALSE
+
+#Rotates the matrix matrix and pivots it wider
+pca_fit_rotated <- pca_fit %>%
+  tidy(matrix = "rotation") %>%
+  pivot_wider(names_from = "PC", names_prefix = "PC", values_from = "value")
+
+#Plots the rotation matrix
+ggplot(pca_fit_rotated, aes(PC1, PC2)) +
+  geom_segment(aes(xend = 0, yend = 0), 
+    arrow = arrow(
+      angle = 20,
+      ends = "first",
+      type = "closed",
+      length = grid::unit(8, "pt"))) +
+  geom_text(aes(label = column),
+    hjust = 1, nudge_x = -0.02,
+    color = "#904C2F") +
+  xlim(-1.25, .5) +
+  ylim(-.5, 1) +
+  coord_fixed() +
+  theme_minimal_grid(12)
+```
+
+## PCA variances
+
+Here, the variances of the different principal components is calculated and plotted.
+
+```{r}
+#| label: PCA_Variance_and_Plotting
+#| eval: TRUE
+#| echo: TRUE
+#| message: FALSE
+#| warning: FALSE
+
+#The eigenvalues (variances) are calculated
+pca_fit_eigenvalues <- pca_fit %>%
+  tidy(matrix = "eigenvalues")
+
+#Plots the variences
+ggplot(pca_fit_eigenvalues, aes(PC, percent)) +
+  geom_col(fill = "#56B4E9", alpha = 0.8) +
+  scale_x_continuous(breaks = 1:9) +
+  scale_y_continuous(
+    labels = scales::percent_format(),
+    expand = expansion(mult = c(0, 0.01))) +
+  theme_minimal_hgrid(12)
+```
