@@ -4,23 +4,32 @@ format: html
 editor: visual
 ---
 
-## Quarto
+# s233028
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+## New analysis
 
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+This is a test of a new feature.
 
 ```{r}
-1 + 1
+# test chunk of r code 
+# Create a numeric vector
+numbers <- c(10, 20, 15, 25, 30, 35, 40, 45, 50)
+
+# Calculate mean, median, and standard deviation
+mean_value <- mean(numbers)
+median_value <- median(numbers)
+sd_value <- sd(numbers)
+
+# Print the calculated values
+cat("Mean:", mean_value, "\n")
+cat("Median:", median_value, "\n")
+cat("Standard Deviation:", sd_value, "\n")
+
+# Plot a histogram
+hist(numbers, main="Histogram of Numbers", xlab="Values", col="skyblue", border="black")
+
+# Add a line for mean value
+abline(v=mean_value, col="red", lwd=2, lty=2)
+
+
 ```
-
-You can add options to executable code like this
-
-```{r}
-#| echo: false
-2 * 2
-```
-
-The `echo: false` option disables the printing of code (only output is displayed).
